@@ -1,12 +1,22 @@
 import React from 'react'
-import { Link, Route, Routes } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import './servicemanager.css'
 import ServiceManagerHome from './ServiceManagerHome'
 import AddService from './AddService'
-import ViewServices from './ViewServices'
-import ViewBookings from './ViewBookings'
+import ViewServicesByManager from './ViewServicesByManager'
+import ViewBookingsByManager from './ViewBookingsByManager'
+import PageNotFound from '../pages/PageNotFound'
+import { useAuth } from '../context/AuthContext'
 
 const ServiceManagerNavBar = () => {
+	const navigate = useNavigate()
+	const { logout } = useAuth()
+
+	const handleLogout = () => {
+		logout()
+		navigate('/')
+	}
+
 	return (
 		<div className="sm-layout">
 			<nav className="sm-navbar">
@@ -15,18 +25,20 @@ const ServiceManagerNavBar = () => {
 				<ul className="sm-nav-links">
 					<li><Link to="/servicemanager/home">Home</Link></li>
 					<li><Link to="/servicemanager/addservice">Add Service</Link></li>
-					<li><Link to="/servicemanager/viewaservices">View Services</Link></li>
+					<li><Link to="/servicemanager/viewservices">View Services</Link></li>
 					<li><Link to="/servicemanager/viewbookings">View Bookings</Link></li>
-					<li><button type="button">Logout</button></li>
+					<li><button type="button" onClick={handleLogout}>Logout</button></li>
 				</ul>
 			</nav>
 
 			<main className="sm-page-wrap">
 				<Routes>
-					<Route path="/home" element={<ServiceManagerHome />} />
-					<Route path="/addservice" element={<AddService />} />
-					<Route path="/viewservices" element={<ViewServices />} />
-					<Route path="/viewbookings" element={<ViewBookings />} />
+					<Route path="/" element={<Navigate to="/servicemanager/home" replace />} />
+					<Route path="/servicemanager/home" element={<ServiceManagerHome />} />
+					<Route path="/servicemanager/addservice" element={<AddService />} />
+					<Route path="/servicemanager/viewservices" element={<ViewServicesByManager />} />
+					<Route path="/servicemanager/viewbookings" element={<ViewBookingsByManager />} />
+					<Route path="*" element={<PageNotFound />} />
 				</Routes>
 			</main>
 		</div>

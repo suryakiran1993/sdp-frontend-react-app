@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ViewBookings = () => {
+const ViewBookingsByManager = () => {
   return (
     <section className="sm-section-card">
       <h2>View Bookings</h2>
@@ -9,4 +9,4 @@ const ViewBookings = () => {
   )
 }
 
-export default ViewBookings
+export default ViewBookingsByManager

@@ -1,8 +1,14 @@
 import React from 'react'
 
 const CustomerHome = () => {
+  
+  const customer = JSON.parse(sessionStorage.getItem('loggedInCustomer'))
+ 
   return (
-    <div>CustomerHome</div>
+    <section className="customer-section-card">
+      <h2>Customer Home</h2>
+      <p>Welcome, {customer.name}</p>
+    </section>
   )
 }
 
