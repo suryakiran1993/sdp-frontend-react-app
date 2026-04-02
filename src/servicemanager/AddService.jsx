@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import axios from '../api/axiosClient'
 
 const AddService = () => {
-  const manager = JSON.parse(sessionStorage.getItem('loggedInServiceManager') || '{}')
-  const managerId = manager.id
+  const storedManager = sessionStorage.getItem('loggedInServiceManager')
+  const manager = storedManager ? JSON.parse(storedManager) : null
+  const managerId = manager?.id
 
   const [formData, setFormData] = useState({
     category: '',
@@ -23,6 +24,12 @@ const AddService = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    if (!managerId) {
+      setMessage('')
+      setError('Manager details are not available in session. Please sign in with the service manager portal.')
+      return
+    }
 
     const payload = {
       category: formData.category,
@@ -55,6 +62,17 @@ const AddService = () => {
         setError('Bad Request - Check your input')
       }
     }
+  }
+
+  if (!managerId) {
+    return (
+      <section className="sm-section-card">
+        <h2 style={{ textAlign: 'center' }}>Add Service</h2>
+        <p className="sm-error" style={{ textAlign: 'center' }}>
+          Manager details are not available in session. Please sign in with the service manager portal.
+        </p>
+      </section>
+    )
   }
 
   return (

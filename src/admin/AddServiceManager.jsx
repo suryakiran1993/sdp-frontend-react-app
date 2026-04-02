@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import axios from '../api/axiosClient'
 
 const AddServiceManager = () => {
 	const [formData, setFormData] = useState({

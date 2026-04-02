@@ -68,7 +68,7 @@ const CustomerRegistration = () => {
       <div className="login-card registration-card">
         <h2 className="login-title">Customer Registration</h2>
         {message && (
-          <div className="form-message">
+          <div className="form-message form-message-success">
             {message}
           </div>
         )}

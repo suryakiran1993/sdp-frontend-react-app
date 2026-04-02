@@ -4,14 +4,32 @@ import { useNavigate } from 'react-router-dom'
 import './style.css'
 import { useAuth } from '../context/AuthContext'
 
+const URL = `${import.meta.env.VITE_API_URL}/auth/login`
+
+const storeUserSession = (role, user) => {
+  sessionStorage.removeItem('loggedInAdmin')
+  sessionStorage.removeItem('loggedInCustomer')
+  sessionStorage.removeItem('loggedInServiceManager')
+
+  if (role === 'ADMIN') {
+    sessionStorage.setItem('loggedInAdmin', JSON.stringify(user))
+  }
+
+  if (role === 'CUSTOMER') {
+    sessionStorage.setItem('loggedInCustomer', JSON.stringify(user))
+  }
+
+  if (role === 'MANAGER') {
+    sessionStorage.setItem('loggedInServiceManager', JSON.stringify(user))
+  }
+}
+
 const CustomerLogin = () => {
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { loginAs } = useAuth()
-
-  const URL = `${import.meta.env.VITE_API_URL}/customerapi/login`
+  const { login } = useAuth()
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -21,12 +39,20 @@ const CustomerLogin = () => {
     e.preventDefault()
 
     try {
-      const response = await axios.post(URL, formData)
+      const payload = {
+        login: formData.email,
+        password: formData.password,
+        role: 'CUSTOMER',
+      }
+
+      const response = await axios.post(URL, payload)
 
       if (response.status === 200) 
       {
-        sessionStorage.setItem('loggedInCustomer', JSON.stringify(response.data))
-        loginAs('customer')
+        const data = response.data
+        login({ token: data.token, role: data.role })
+        storeUserSession(data.role, data.user)
+        setMessage('')
         setError('')
         navigate('/customer/home')
       }

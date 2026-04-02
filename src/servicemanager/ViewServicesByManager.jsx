@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
+import axios from '../api/axiosClient'
 
 const ViewServicesByManager = () => {
-  const manager = JSON.parse(sessionStorage.getItem('loggedInServiceManager'))
-  const managerId = manager.id
+  const storedManager = sessionStorage.getItem('loggedInServiceManager')
+  const manager = storedManager ? JSON.parse(storedManager) : null
+  const managerId = manager?.id
   const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState(null)
@@ -13,24 +14,41 @@ const ViewServicesByManager = () => {
   const VIEW_URL = `${import.meta.env.VITE_API_URL}/servicemanagerapi/viewmyservices`
   const DELETE_URL = `${import.meta.env.VITE_API_URL}/servicemanagerapi/deleteservicedetails`
 
-  const fetchServices = async () => {
-  
-    try {
-      setLoading(true)
-      const response = await axios.get(`${VIEW_URL}/${managerId}`)
-      setServices(Array.isArray(response.data) ? response.data : [])
-      setError('')
-    } catch (err) {
-      setServices([])
-      setError(err.response?.status === 204 ? '' : 'Failed to fetch services')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
+    const fetchServices = async () => {
+      if (!managerId) {
+        setServices([])
+        setError('Manager details are not available in session. Please sign in with the service manager portal.')
+        setLoading(false)
+        return
+      }
+
+      try {
+        setLoading(true)
+        const response = await axios.get(`${VIEW_URL}/${managerId}`)
+        setServices(Array.isArray(response.data) ? response.data : [])
+        setError('')
+      } catch (err) {
+        setServices([])
+        setError(err.response?.status === 204 ? '' : 'Failed to fetch services')
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchServices()
-  }, [])
+  }, [VIEW_URL, managerId])
+
+  if (!managerId) {
+    return (
+      <section className="sm-section-card">
+        <h2 style={{ textAlign: 'center' }}>View All Services</h2>
+        <p className="sm-error" style={{ textAlign: 'center' }}>
+          Manager details are not available in session. Please sign in with the service manager portal.
+        </p>
+      </section>
+    )
+  }
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm('Delete this service?')
@@ -41,7 +59,10 @@ const ViewServicesByManager = () => {
       const response = await axios.delete(`${DELETE_URL}/${id}`)
       setMessage(response.data)
       setError('')
-      fetchServices()
+      setLoading(true)
+
+      const refreshResponse = await axios.get(`${VIEW_URL}/${managerId}`)
+      setServices(Array.isArray(refreshResponse.data) ? refreshResponse.data : [])
     } catch (err) {
       setMessage('')
       if (err.response?.status === 500) {
@@ -50,6 +71,7 @@ const ViewServicesByManager = () => {
         setError('Something went wrong while deleting service')
       }
     } finally {
+      setLoading(false)
       setDeletingId(null)
     }
   }

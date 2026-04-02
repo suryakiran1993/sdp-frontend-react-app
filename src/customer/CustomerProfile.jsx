@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import axios from '../api/axiosClient'
 
 const CustomerProfile = () => 
 {
@@ -43,7 +43,18 @@ const CustomerProfile = () =>
 
 		try {
 			const loggedInCustomer = sessionStorage.getItem('loggedInCustomer')
+			if (!loggedInCustomer) {
+				setMessage('')
+				setError('Customer profile details are not available in session. Please sign in with the customer portal.')
+				return
+			}
+
 			const customer = JSON.parse(loggedInCustomer)
+			if (!customer?.id) {
+				setMessage('')
+				setError('Customer profile details are not available in session. Please sign in with the customer portal.')
+				return
+			}
 			
 			const response = await axios.post(URL, {
 				id: customer.id,
