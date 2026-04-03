@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
 import axios from '../api/axiosClient'
 
-const CustomerProfile = () => 
-{
-	const [formData, setFormData] = useState(() => 
-	{
+const CustomerProfile = () => {
+	const [formData, setFormData] = useState(() => {
 		const loggedInCustomer = sessionStorage.getItem('loggedInCustomer')
+
 		if (!loggedInCustomer) {
 			return {
 				email: '',
@@ -14,11 +13,12 @@ const CustomerProfile = () =>
 				name: '',
 				contact: '',
 				location: '',
-				password: ''
+				password: '********' // dummy password
 			}
 		}
 
 		const customer = JSON.parse(loggedInCustomer)
+
 		return {
 			email: customer.email,
 			username: customer.username,
@@ -26,9 +26,10 @@ const CustomerProfile = () =>
 			name: customer.name,
 			contact: customer.contact,
 			location: customer.location,
-			password: customer.password
+			password: '********' // dummy password
 		}
 	})
+
 	const [message, setMessage] = useState('')
 	const [error, setError] = useState('')
 
@@ -43,38 +44,60 @@ const CustomerProfile = () =>
 
 		try {
 			const loggedInCustomer = sessionStorage.getItem('loggedInCustomer')
+
 			if (!loggedInCustomer) {
+				setError('Customer session not found. Please login again.')
 				setMessage('')
-				setError('Customer profile details are not available in session. Please sign in with the customer portal.')
 				return
 			}
 
 			const customer = JSON.parse(loggedInCustomer)
+
 			if (!customer?.id) {
+				setError('Invalid session. Please login again.')
 				setMessage('')
-				setError('Customer profile details are not available in session. Please sign in with the customer portal.')
 				return
 			}
-			
-			const response = await axios.post(URL, {
+
+			// ✅ Base payload
+			const payload = {
 				id: customer.id,
 				name: formData.name,
 				contact: formData.contact,
-				location: formData.location,
-				password: formData.password
-			})
+				location: formData.location
+			}
+
+			// ✅ Only send password if user changed it
+			if (
+				formData.password &&
+				formData.password !== '********'
+			) {
+				payload.password = formData.password
+			}
+
+			const response = await axios.post(URL, payload)
 
 			if (response.status === 201) {
 				const updatedCustomer = {
 					...customer,
 					name: formData.name,
 					contact: formData.contact,
-					location: formData.location,
-					password: formData.password
+					location: formData.location
 				}
-				sessionStorage.setItem('loggedInCustomer', JSON.stringify(updatedCustomer))
+
+				sessionStorage.setItem(
+					'loggedInCustomer',
+					JSON.stringify(updatedCustomer)
+				)
+
 				setMessage(response.data)
 				setError('')
+
+				// ✅ Reset password to dummy again
+				setFormData({
+					...formData,
+					password: '********'
+				})
 			}
 		} catch (err) {
 			setMessage('')
@@ -91,107 +114,75 @@ const CustomerProfile = () =>
 	return (
 		<section className="customer-section-card">
 			<h2>Update Customer Profile</h2>
-			{message && (
-				<div className="form-message">
-					{message}
-				</div>
-			)}
+
+			{message && <div className="form-message">{message}</div>}
 			{error && (
-				<div className="form-message form-message-error">
-					{error}
-				</div>
+				<div className="form-message form-message-error">{error}</div>
 			)}
+
 			<form onSubmit={handleSubmit} className="login-form">
+
 				<div className="form-group">
-					<label htmlFor="email">Email Address</label>
-					<input
-						type="email"
-						id="email"
-						name="email"
-						value={formData.email}
-						disabled
-					/>
+					<label>Email Address</label>
+					<input type="email" value={formData.email} disabled />
 				</div>
 
 				<div className="form-group">
-					<label htmlFor="username">Username</label>
-					<input
-						type="text"
-						id="username"
-						name="username"
-						value={formData.username}
-						disabled
-					/>
+					<label>Username</label>
+					<input type="text" value={formData.username} disabled />
 				</div>
 
 				<div className="form-group">
-					<label htmlFor="gender">Gender</label>
-					<input
-						type="text"
-						id="gender"
-						name="gender"
-						value={formData.gender}
-						disabled
-					/>
+					<label>Gender</label>
+					<input type="text" value={formData.gender} disabled />
 				</div>
 
 				<div className="form-group">
-					<label htmlFor="name">Full Name</label>
+					<label>Full Name</label>
 					<input
 						type="text"
-						id="name"
 						name="name"
-						placeholder="Enter your full name"
 						value={formData.name}
 						onChange={handleChange}
 						required
-						maxLength={50}
 					/>
 				</div>
 
 				<div className="form-group">
-					<label htmlFor="contact">Contact Number</label>
+					<label>Contact Number</label>
 					<input
 						type="text"
-						id="contact"
 						name="contact"
-						placeholder="Enter your contact number"
 						value={formData.contact}
 						onChange={handleChange}
 						required
-						maxLength={20}
 					/>
 				</div>
 
 				<div className="form-group">
-					<label htmlFor="location">Location</label>
+					<label>Location</label>
 					<input
 						type="text"
-						id="location"
 						name="location"
-						placeholder="Enter your location"
 						value={formData.location}
 						onChange={handleChange}
 						required
-						maxLength={100}
 					/>
 				</div>
 
 				<div className="form-group">
-					<label htmlFor="password">Password</label>
+					<label>Password</label>
 					<input
 						type="password"
-						id="password"
 						name="password"
-						placeholder="Enter your password"
 						value={formData.password}
 						onChange={handleChange}
-						required
-						maxLength={50}
 					/>
 				</div>
 
-				<button type="submit" className="login-btn">Update Profile</button>
+				<button type="submit" className="login-btn">
+					Update Profile
+				</button>
 			</form>
 		</section>
 	)

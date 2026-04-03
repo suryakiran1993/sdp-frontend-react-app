@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, Routes, Route } from 'react-router-dom'
-import './Style.css'
+import './style.css'
 import Home from './Home'
 import CustomerRegistration from './CustomerRegistration'
 import CustomerLogin from './CustomerLogin'
@@ -8,6 +8,7 @@ import ServiceManagerLogin from './ServiceManagerLogin'
 import AdminLogin from './AdminLogin'
 import Login from './Login'
 import Contact from './Contact'
+import MUIDemo from './MUIDemo'
 import PageNotFound from './PageNotFound'
 
 const MainNavBar = () => {
@@ -21,6 +22,7 @@ const MainNavBar = () => {
           <li><Link to="/customerregistration">Customer Registration</Link></li>
           <li><Link to="/login">Login</Link></li>
           <li><Link to="/contact">Contact</Link></li>
+          <li><Link to="/muidemo">MUI Demo</Link></li>
           
         </ul>
       </nav>
@@ -29,6 +31,7 @@ const MainNavBar = () => {
         <Route path="/customerregistration" element={<CustomerRegistration />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login/>} />
+        <Route path="/muidemo" element={<MUIDemo />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>
