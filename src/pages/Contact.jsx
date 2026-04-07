@@ -1,110 +1,145 @@
 import React, { useState } from 'react'
+import axios from 'axios'
 import './style.css'
 
-const initialFormData = {
-  fullname: '',
-  subject: '',
-  message: '',
-  receiveremail: '',
-  contact: '',
-}
-
 const Contact = () => {
-  const [formData, setFormData] = useState(initialFormData)
+  const [formData, setFormData] = useState({
+     fullname: '',
+     subject: '',
+     message: '',
+     receiveremail: '',
+     contact: '',
+  })
   const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
-  const handleChange = (e) => {
+  const handleChange = (e) => 
+  {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setMessage('Your message has been sent successfully.')
-    setFormData(initialFormData)
+    setMessage('')
+    setError('')
+
+    try 
+    {
+      const response = await axios.post('http://localhost:2026/demoapi/sendemail',formData)
+      setMessage(response.data) // "Email Sent Successfully"
+      if (response.status === 200)
+      {
+        setMessage(response.data)
+        setFormData({
+          fullname: '',
+          subject: '',
+          message: '',
+          receiveremail: '',
+          contact: '',
+        })
+
+      }
+    } 
+    catch (err) 
+     {
+      setMessage('')
+      if (err.response?.status === 500) 
+      {
+        setError('Internal Server Error - Failed to add service')
+      } 
+      else if (err.request) 
+      {
+        setError('Network Error - Server not responding')
+      } 
+      else 
+      {
+        setError('Bad Request - Check your input')
+      }
+    }
   }
 
   return (
     <div className="login-container">
       <div className="login-card registration-card">
         <h2 className="login-title">Contact Us</h2>
+
         {message && (
           <div className="form-message form-message-success">
             {message}
           </div>
         )}
+
+        {error && (
+          <div className="form-message form-message-error">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="fullname">Full Name</label>
+            <label>Full Name</label>
             <input
               type="text"
-              id="fullname"
               name="fullname"
               placeholder="Enter your full name"
               value={formData.fullname}
               onChange={handleChange}
               required
-              maxLength={100}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="subject">Subject</label>
+            <label>Subject</label>
             <input
               type="text"
-              id="subject"
               name="subject"
-              placeholder="Enter message subject"
+              placeholder="Enter subject"
               value={formData.subject}
               onChange={handleChange}
               required
-              maxLength={120}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="message">Message</label>
+            <label>Message</label>
             <textarea
-              id="message"
               name="message"
-              placeholder="Enter your message"
+              placeholder="Enter message"
               value={formData.message}
               onChange={handleChange}
               required
               rows={4}
-              maxLength={1000}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="receiveremail">Receiver Email</label>
+            <label>Email</label>
             <input
               type="email"
-              id="receiveremail"
               name="receiveremail"
-              placeholder="Enter receiver email"
+              placeholder="Enter email"
               value={formData.receiveremail}
               onChange={handleChange}
               required
-              maxLength={100}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="contact">Contact Number</label>
+            <label>Contact</label>
             <input
               type="tel"
-              id="contact"
               name="contact"
-              placeholder="Enter your contact number"
+              placeholder="Enter contact number"
               value={formData.contact}
               onChange={handleChange}
               required
-              maxLength={20}
             />
           </div>
 
-          <button type="submit" className="login-btn">Send Message</button>
+          <button type="submit" className="login-btn">
+            Send Message
+          </button>
         </form>
       </div>
     </div>

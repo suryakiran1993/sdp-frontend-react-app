@@ -52,7 +52,9 @@ const AddService = () => {
           baseprice: '',
         })
       }
-    } catch (err) {
+    } 
+    catch (err) 
+     {
       setMessage('')
       if (err.response?.status === 500) {
         setError('Internal Server Error - Failed to add service')
